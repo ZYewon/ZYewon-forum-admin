@@ -71,19 +71,12 @@ const modelConfig: IModelConfig = {
     {
       element: "select",
       placeholder: "请选择标签",
-      field: "tag",
-      fieldType: "string",
+      field: "tags",
+      fieldType: "array",
+      fieldDefault: [],
       label: "标签",
-      options: [
-        {
-          field: "hot",
-          name: "热门",
-        },
-        {
-          field: "prime",
-          name: "精华",
-        },
-      ],
+      options: [],
+      multiple: true,
     },
   ],
   rules: {

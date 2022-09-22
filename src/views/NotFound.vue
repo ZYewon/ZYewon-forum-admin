@@ -1,12 +1,20 @@
 <template>
   <div class="not-found">
     <div class="container">
-      <el-button class="goHome" type="primary">返回首页</el-button>
+      <el-button class="goHome" type="primary" @click="goHome"
+        >返回首页</el-button
+      >
     </div>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useRouter } from "vue-router";
+const router = useRouter();
+const goHome = () => {
+  router.replace({ name: "home" });
+};
+</script>
 
 <style scoped lang="scss">
 .not-found {

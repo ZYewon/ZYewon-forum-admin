@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import UserStore from "store/user";
+import MenuStore from "store/menu";
 import { isEmpty } from "@/libs";
 import routes from "./routes";
 const router = createRouter({
@@ -9,6 +10,7 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const userStore = UserStore();
+  const menuStore = MenuStore();
   if (isEmpty(userStore.token)) {
     if (to.name === "login") {
       next();
@@ -22,7 +24,9 @@ router.beforeEach(async (to, from, next) => {
         if (to.name === "login") {
           next({ name: "home" });
         } else {
-          next();
+          await menuStore.getMenuListAsync();
+          await menuStore.addRoutes();
+          next(to.path);
         }
       } else {
         next({ name: "home" });

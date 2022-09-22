@@ -9,6 +9,7 @@ interface ZyewonRequestConfigInterceptor<T = any> {
 
 interface ZyewonRequestConfig<T = any> extends AxiosRequestConfig {
   interceptor?: ZyewonRequestConfigInterceptor<T>;
+  mock?: boolean;
 }
 
 export type { ZyewonRequestConfigInterceptor, ZyewonRequestConfig };

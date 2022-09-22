@@ -13,4 +13,13 @@ const locale = zhCn;
 <style>
 @import "@/assets/css/reset.css";
 @import "@/assets/css/common.css";
+.ml5 {
+  margin-left: 5px;
+}
+.mb10 {
+  margin-bottom: 10px;
+}
+.mr5 {
+  margin-right: 5px;
+}
 </style>

@@ -18,7 +18,7 @@ export const getList = (params: ListType) => {
 // 删除文章
 export const deletePost = (id: string) => {
   return request.delete({
-    url: "/content/delete",
+    url: "/admin/content-delete",
     params: {
       id,
     },
@@ -37,7 +37,36 @@ interface IUpdatePost {
 }
 export const updatePost = (data: IUpdatePost) => {
   return request.post({
-    url: "/content/update",
+    url: "/admin/content-update",
     data,
+  });
+};
+
+// 批量更新文章属性
+interface ITags {
+  class?: string;
+  name?: string;
+}
+interface IBatchUpdatePost {
+  tids: string[];
+  isEnd: 0 | 1;
+  isTop: "0" | "1";
+  status: "0" | "1";
+  tags?: ITags[];
+}
+export const batchUpdatePost = (data: IBatchUpdatePost) => {
+  return request.post({
+    url: "/admin/batch-content-update",
+    data,
+  });
+};
+
+// 批量删除文章
+export const batchDeletePost = (tids: string[]) => {
+  return request.post({
+    url: "/admin/batch-content-delete",
+    data: {
+      tids,
+    },
   });
 };

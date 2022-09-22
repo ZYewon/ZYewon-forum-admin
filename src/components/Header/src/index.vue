@@ -9,7 +9,8 @@
           class="breadcrumb-item"
           v-for="item in breadcrumbList"
           :key="item.name"
-          >{{ item.meta.title }}</el-breadcrumb-item
+        >
+          {{ item.meta.title }}</el-breadcrumb-item
         >
       </el-breadcrumb>
     </div>
@@ -28,7 +29,7 @@
         <div class="user-menu" v-show="isShowMenu">
           <ul>
             <li>我的消息</li>
-            <li>退出登录</li>
+            <li @click="logout">退出登录</li>
           </ul>
         </div>
       </transition>
@@ -39,10 +40,13 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
 import { ArrowRight, CaretBottom } from "@element-plus/icons-vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import UserStore from "store/user";
+import MenuStore from "store/menu";
 const userStore = UserStore();
+const menuStore = MenuStore();
 const route = useRoute();
+const router = useRouter();
 const breadcrumbList = ref();
 const isShowMenu = ref(false);
 let timer: any = null;
@@ -73,6 +77,15 @@ const handleMouseLeave = () => {
   timer = setTimeout(() => {
     isShowMenu.value = false;
   }, 300);
+};
+const logout = () => {
+  userStore.setUserInfo({});
+  userStore.setToken("");
+  userStore.setIsLogin(false);
+  localStorage.removeItem("btns");
+  menuStore.menuList = [];
+  menuStore.btns = [];
+  router.replace({ name: "login" });
 };
 </script>
 
@@ -137,8 +150,9 @@ const handleMouseLeave = () => {
       right: -20px;
       width: 120px;
       background-color: #fff;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.23);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.23);
       border-radius: 10px;
+      z-index: 99999;
       ul {
         display: flex;
         flex-direction: column;

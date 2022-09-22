@@ -40,6 +40,7 @@ import { ElForm, ElMessage } from "element-plus";
 import { v4 as uuid } from "uuid";
 import globalStore from "store/global";
 import UserStore from "store/user";
+import MenuStore from "store/menu";
 import { isEmpty } from "@/libs";
 import { getCaptcha } from "api/public";
 import { loginAsync } from "api/login";
@@ -79,6 +80,7 @@ const rules = reactive({
 });
 const store = globalStore();
 const userStore = UserStore();
+const menuStore = MenuStore();
 const svg = ref<string>("");
 // 获取验证码
 const getCaptchaAsync = async () => {
@@ -117,6 +119,8 @@ const submit = async () => {
   userStore.setToken(res.data.token);
   userStore.setUserInfo(res.data.data);
   ElMessage.success("登陆成功");
+  await menuStore.getMenuListAsync();
+  await menuStore.addRoutes();
   router.replace({ name: "home" });
 };
 </script>

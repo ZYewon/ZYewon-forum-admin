@@ -1,8 +1,9 @@
 <template>
   <el-dialog
     v-model="isShow"
-    title="编辑文章属性"
+    :title="title"
     :width="modelConfig.dialogWidth ? modelConfig.dialogWidth : '40%'"
+    @close="close"
   >
     <el-form
       :model="pageModel"
@@ -21,6 +22,9 @@
               :placeholder="item.placeholder"
               :type="item.inputType"
               v-model="pageModel[item.field]"
+              :disabled="item.disabled ? item.disabled : false"
+              :rows="item.rows ? item.rows : 2"
+              :style="{ width: item.width }"
             ></el-input>
           </el-form-item>
         </template>
@@ -34,6 +38,7 @@
               class="m-2 select"
               :placeholder="item.placeholder"
               v-model="pageModel[item.field]"
+              v-bind="item"
             >
               <el-option
                 v-for="opt in item.options"
@@ -81,10 +86,12 @@ import { IModelConfig, IConfigList } from "../types";
 // 设置 props
 const props = withDefaults(
   defineProps<{
-    defaultValue: any;
+    defaultValue?: any;
     modelConfig: IModelConfig;
+    title?: string;
   }>(),
   {
+    title: "model",
     defaultValue: () => ({}),
     modelConfig: () => ({
       configList: [],
@@ -95,13 +102,10 @@ const props = withDefaults(
 const isShow = ref(false);
 // form 表单数据对象
 const pageModel = ref<any>({});
+const modelRef = ref<InstanceType<typeof ElForm>>();
 const setPageModel = (config: IConfigList[]) => {
   config.forEach((item) => {
-    if (item.fieldType === "string") {
-      pageModel.value[item.field] = "";
-    } else {
-      pageModel.value[item.field] = item.fieldDefault;
-    }
+    pageModel.value[item.field] = item.fieldDefault ?? "";
   });
 };
 // 当传入配置项时，读取并创建 v-model 所需要的变量
@@ -109,6 +113,9 @@ watch(
   () => props.modelConfig,
   (newVal) => {
     setPageModel(newVal.configList);
+  },
+  {
+    immediate: true,
   }
 );
 // 在打开编辑框时如果传递了 default 则读取并赋值
@@ -119,7 +126,10 @@ watch(
   }
 );
 
-const modelRef = ref<InstanceType<typeof ElForm>>();
+const emit = defineEmits(["close"]);
+const close = () => {
+  emit("close");
+};
 // 向外抛出方法
 defineExpose({
   show() {
@@ -133,6 +143,16 @@ defineExpose({
   },
   validate() {
     return modelRef.value?.validate();
+  },
+  resetField() {
+    modelRef.value?.resetFields();
+    setPageModel(props.modelConfig.configList);
+    modelRef.value?.clearValidate();
+  },
+  resetAll() {
+    pageModel.value = {};
+    modelRef.value?.resetFields();
+    modelRef.value?.clearValidate();
   },
 });
 </script>

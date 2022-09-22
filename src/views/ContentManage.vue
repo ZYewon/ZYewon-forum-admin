@@ -1,247 +1,171 @@
 <template>
   <div class="main-container">
-    <div class="search">
-      <el-form
-        :inline="true"
-        :model="contentForm"
-        class="demo-form-inline"
-        :rules="rules"
-        ref="searchRef"
-      >
-        <el-form-item prop="selectValue">
-          <el-select
-            v-model="contentForm.selectValue"
-            class="m-2"
-            placeholder="请选择"
-          >
-            <el-option
-              v-for="item in selectOptions"
-              :key="item.field"
-              :label="item.name"
-              :value="item.field"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item
-          prop="field"
-          v-if="
-            contentForm.selectValue === 'title' ||
-            contentForm.selectValue === 'tag' ||
-            contentForm.selectValue === 'nickname' ||
-            contentForm.selectValue === ''
-          "
+    <PageSearch :search-config="searchConfig" ref="searchRef">
+      <template #handler>
+        <el-button type="primary" @click="onSearch">搜索</el-button>
+      </template>
+    </PageSearch>
+    <PageTable
+      :table-config="tableConfig"
+      :table-data="tableData"
+      @select="select"
+      @selectAll="selectAll"
+    >
+      <template #status="{ data }">
+        <el-button
+          :type="+data.row.status === 0 ? 'success' : 'danger'"
+          size="small"
         >
-          <el-input v-model="contentForm.field" placeholder="请输入关键字" />
-        </el-form-item>
-        <el-form-item v-if="contentForm.selectValue === 'created'" prop="date">
-          <el-date-picker
-            v-model="contentForm.date"
-            type="date"
-            placeholder="请选择日期"
-          />
-        </el-form-item>
-        <el-form-item
-          v-if="contentForm.selectValue === 'catalog'"
-          prop="catalog"
+          {{ +data.row.status === 0 ? "on" : "off" }}
+        </el-button>
+      </template>
+      <template #operate="{ data }">
+        <el-button
+          size="small"
+          type="primary"
+          @click="handleEdit(data.row)"
+          v-hasBtn="'content-update'"
         >
-          <el-select
-            v-model="contentForm.catalog"
-            class="m-2"
-            placeholder="请选择分类"
-          >
-            <el-option
-              v-for="item in catalogs"
-              :key="item.field"
-              :label="item.name"
-              :value="item.field"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item
-          v-if="
-            contentForm.selectValue === 'isEnd' ||
-            contentForm.selectValue === 'isTop' ||
-            contentForm.selectValue === 'status'
-          "
+          编辑
+        </el-button>
+        <el-button
+          size="small"
+          type="danger"
+          @click="handleDetete(data.row, data.$index)"
+          v-hasBtn="'content-delete'"
+          >删除</el-button
         >
-          <el-radio-group v-model="contentForm.radio" class="ml-4">
-            <el-radio label="-1">全部</el-radio>
-            <el-radio label="0">是</el-radio>
-            <el-radio label="1">否</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="onSubmit">搜索</el-button>
-        </el-form-item>
-      </el-form>
-    </div>
-    <div class="table">
-      <el-table :data="tableData" style="width: 100%">
-        <el-table-column type="selection" width="55" />
-        <el-table-column
-          v-for="item in tableConfig"
-          :key="item.prop"
-          show-overflow-tooltip
-          :align="item.prop === 'title' ? 'left' : 'center'"
-          v-bind="item"
+      </template>
+    </PageTable>
+    <PagePagination
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total"
+      v-model:page-size="params.limit"
+      v-model:current-page="params.page"
+      :page-sizes="[20, 40, 60, 80]"
+      :background="true"
+      @currentChange="handleCurrentChange"
+      @sizeChange="handleSizeChange"
+    >
+      <template #handler>
+        <el-button
+          type="danger"
+          @click="batchDelete"
+          v-hasBtn="'batch-content-delete'"
+          >批量删除</el-button
         >
-          <template v-if="item.prop === 'status'" v-slot="{ row }">
-            <el-button
-              :type="+row.status === 0 ? 'success' : 'danger'"
-              size="small"
-            >
-              {{ +row.status === 0 ? "on" : "off" }}
-            </el-button>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" min-width="150" align="center">
-          <template v-slot="{ row, column, $index }">
-            <el-button size="small" type="primary" @click="handleEdit(row)"
-              >编辑</el-button
-            >
-            <el-button
-              size="small"
-              type="danger"
-              @click="handleDetete(row, $index)"
-              >删除</el-button
-            >
-          </template>
-        </el-table-column>
-      </el-table>
-    </div>
-    <div class="other">
-      <!-- 导出为 xxx 格式文件 -->
-      <div class="export-btn">
-        <el-button type="primary">导出为 Excel 文件</el-button>
-      </div>
-      <!-- 翻页 -->
-      <div class="pagination">
-        <el-pagination
-          v-model:currentPage="params.page"
-          :page-size="params.limit"
-          :page-sizes="[20, 40, 60, 80]"
-          :small="true"
-          :background="true"
-          layout="total, prev, pager, next, jumper,sizes"
-          :total="total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </div>
+        <el-button
+          type="primary"
+          @click="batchEdit"
+          v-hasBtn="'batch-content-update'"
+          >批量设置</el-button
+        >
+        <el-button type="primary" :icon="Upload">导出表格</el-button>
+      </template>
+    </PagePagination>
+    <!--单列的编辑模态框-->
+    <PageModel
+      ref="model"
+      title="编辑文章属性"
+      :default-value="defaultValue"
+      :modelConfig="modelConfig"
+      @close="() => closeModel(model)"
+    >
+      <template #footer>
+        <el-button type="primary" @click="() => confirmBtn(model)"
+          >确认</el-button
+        >
+        <el-button @click="() => closeModel(model)">取消</el-button>
+      </template>
+    </PageModel>
+    <!--多选的编辑模态框-->
+    <PageModel
+      title="批量编辑文章属性"
+      ref="batchRef"
+      :model-config="batchModelConfig"
+      @close="() => closeModel(batchRef)"
+    >
+      <template #footer>
+        <el-button type="primary" @click="() => confirmBtn(batchRef, 'batch')"
+          >确认</el-button
+        >
+        <el-button @click="() => closeModel(batchRef)">取消</el-button>
+      </template>
+    </PageModel>
   </div>
-  <!-- <EditModel ref="model" :default-value="defaultValue" /> -->
-  <PageModel
-    ref="model"
-    :default-value="defaultValue"
-    :modelConfig="modelConfig"
-  >
-    <template #footer>
-      <el-button type="primary" @click="confirmBtn">确认</el-button>
-      <el-button @click="closeModel">取消</el-button>
-    </template>
-  </PageModel>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onMounted, watch } from "vue";
-import { ElForm, ElMessage, ElMessageBox } from "element-plus";
-import { getList, deletePost, updatePost } from "api/content";
 import dayjs from "dayjs";
-import EditModel from "comp/Content";
-import { IDefaultValue } from "comp/Content/types";
-import PageModel from "@/components/common/PageModel";
+import { reactive, ref, onMounted } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Upload } from "@element-plus/icons-vue";
+import PageModel from "comp/common/PageModel";
+import PageTable from "comp/common/PageTable";
+import PageSearch from "comp/common/PageSearch";
+import PagePagination from "comp/common/PagePagination";
+import searchConfig from "@/config/pageConfig/content/searchConfig";
 import modelConfig from "@/config/pageConfig/content/modelConfig";
 import tableConfig from "@/config/pageConfig/content/tableConfig";
-const selectOptions = [
-  {
-    field: "title",
-    name: "标题",
-  },
-  {
-    field: "created",
-    name: "创建时间",
-  },
-  {
-    field: "nickname",
-    name: "作者",
-  },
-  {
-    field: "catalog",
-    name: "分类",
-  },
-  {
-    field: "tag",
-    name: "标签",
-  },
-  {
-    field: "isEnd",
-    name: "是否结束",
-  },
-  {
-    field: "status",
-    name: "状态",
-  },
-  {
-    field: "isTop",
-    name: "是否置顶",
-  },
-];
-const rules = {
-  field: [{ required: true, message: "请输入关键字", trigger: "blur" }],
-  date: [{ required: true, message: "请选择日期", trigger: "blur" }],
-  catalog: [{ required: true, message: "请选择分类", trigger: "change" }],
-  radio: [{ required: true, message: "请选择", trigger: "change" }],
-  selectValue: [{ required: true, message: "请选择", trigger: "change" }],
-};
-const contentForm = reactive({
-  field: "",
-  selectValue: "",
-  date: "",
-  catalog: "",
-  radio: "-1",
-});
-const catalogs = [
-  { field: "index", name: "全部" },
-  { field: "ask", name: "提问" },
-  { field: "advice", name: "建议" },
-  { field: "discuss", name: "交流" },
-  { field: "share", name: "分享" },
-  { field: "news", name: "动态" },
-  { field: "notice", name: "公告" },
-];
-watch(
-  () => contentForm.selectValue,
-  () => {
-    contentForm.field = "";
-    contentForm.date = "";
-    contentForm.catalog = "";
-    contentForm.radio = "-1";
-  }
-);
+import batchModelConfig from "@/config/pageConfig/content/batchModelConfig";
+import {
+  getList,
+  deletePost,
+  updatePost,
+  batchUpdatePost,
+  batchDeletePost,
+} from "api/content";
+import { normalizedTags } from "@/libs";
+import type { IDefaultValue } from "@/types/contnet";
+import type { IConfigListOptions } from "comp/common/PageModel/types";
+// 翻页参数
 const params = reactive({
   page: 1,
   limit: 20,
 });
+// 数据总条数
 const total = ref(0);
+// 表格数据
 const tableData = ref<any>([]);
-const model = ref<InstanceType<typeof EditModel>>();
+// 模态框表单 ref
+const model = ref<InstanceType<typeof PageModel>>();
+// 帖子 ID
 const tid = ref<string>("");
 // 获取文章列表
-const getListAsync = async () => {
-  const res = await getList(params);
+const getListAsync = async (data: any = {}) => {
+  const res = await getList({ ...data, ...params });
   if (res.code !== 200) {
+    console.log(res);
     return ElMessage.error(res.msg);
   }
   tableData.value = res.data;
   total.value = res.total;
 };
+// 获取标签列表
+const getTagsAsync = async () => {
+  const res: IConfigListOptions[] = await normalizedTags();
+  // 找到 modelConfig tags 那一项
+  const tags: number = modelConfig.configList.findIndex((item) => {
+    return item.field === "tags";
+  });
+  const batchTags: number = batchModelConfig.configList.findIndex((item) => {
+    return item.field === "tags";
+  });
+  modelConfig.configList[tags].options = res;
+  batchModelConfig.configList[batchTags].options = res;
+};
+// 请求获取文章列表
 onMounted(() => {
   getListAsync();
+  getTagsAsync();
 });
+// 模态框默认值
 const defaultValue = ref<IDefaultValue>();
-const handleSizeChange = () => {};
-const handleCurrentChange = () => {};
+// 翻页 pageSize 变化事件
+const handleSizeChange = (e: any) => {};
+// 翻页 pageNum 变化事件
+const handleCurrentChange = (e: any) => {};
+// 编辑文章数据
 const handleEdit = (row: any) => {
   tid.value = row._id;
   defaultValue.value = {
@@ -251,13 +175,15 @@ const handleEdit = (row: any) => {
     status: row.status,
     favs: +row.favs,
     catalog: row.catalog,
+    tags: row.tags ? row.tags.map((item: any) => item._id) : [],
   };
   model.value?.show(); // 显示模态框
 };
+// 删除文章数据
 const handleDetete = async (row: any, index: number) => {
   try {
     await ElMessageBox.confirm(
-      `删除第 ${index} 条数据， “${row.title}”这篇文章吗？`,
+      `删除第 ${index + 1} 条数据， “${row.title}”这篇文章吗？`,
       "确定要删除文章吗？",
       {
         confirmButtonText: "确定",
@@ -274,60 +200,139 @@ const handleDetete = async (row: any, index: number) => {
     tableData.value = tableData.value.filter((item: any) => item._id !== id);
     total.value--;
     ElMessage.success("成功删除");
-
-    console.log(id);
   } catch (error) {
     ElMessage.warning("取消操作");
   }
 };
 // 模态框确认按钮
-const confirmBtn = async () => {
+const confirmBtn = async (model: typeof PageModel, type?: string) => {
   // 校验表单
   try {
-    const res = await model.value?.validate();
+    const res = await model.validate();
     if (res) {
       // 获得表单里的数据
-      const data = model.value?.getData();
-      // 发送请求更新数据
-      const isUpdate = await updatePost({ ...data, tid: tid.value });
+      let isUpdate = null;
+      const data = model.getData();
+
+      // 批量编辑
+      if (type && type === "batch") {
+        const params: any = {};
+        const tids = batchData.value.map((item) => {
+          return item._id;
+        });
+        Object.keys(data).forEach((key) => {
+          if (data[key] === -1) {
+            params[key] = 0;
+          } else if (data[key] === "-1") {
+            params[key] = "0";
+          } else {
+            params[key] = data[key];
+          }
+        });
+        params.tids = tids;
+        isUpdate = await batchUpdatePost(params);
+      } else {
+        // 单独编辑
+        isUpdate = await updatePost({ ...data, tid: tid.value });
+      }
       // 对接口返回的状态码进行相应处理
       if (isUpdate.code !== 200) {
         return ElMessage.error(isUpdate.msg);
       } else {
         await getListAsync();
-        model.value?.hide();
+        closeModel(model);
         ElMessage.success(isUpdate.msg);
       }
     }
   } catch (error) {}
 };
 // 关闭模态框
-const closeModel = () => {
-  model.value?.hide();
+const closeModel = (model: typeof PageModel) => {
+  model.hide();
+  model.resetField();
 };
-const searchRef = ref<InstanceType<typeof ElForm>>();
-const onSubmit = async () => {
-  try {
-    const valid = await searchRef.value?.validate();
-    if (valid) {
-      const params: any = {};
-      if (
-        contentForm.selectValue === "catalog" ||
-        contentForm.selectValue === "title" ||
-        contentForm.selectValue === "nickname"
-      ) {
-        params[contentForm.selectValue] = contentForm.field;
-      } else if (contentForm.selectValue === "created") {
-        params[contentForm.selectValue] = dayjs(contentForm.date).format();
+// 搜索表单组件
+const searchRef = ref<InstanceType<typeof PageSearch>>();
+// 搜索按钮
+const onSearch = async () => {
+  const valid = await searchRef.value?.validate();
+  if (valid) {
+    const data = searchRef.value.getData();
+    const queryParams: any = {};
+    const value = data.selectValue;
+    if (data.field) {
+      queryParams[value] = data.field;
+    } else if (data.date) {
+      queryParams[value] = dayjs(data.date).format("YYYY-MM-DD");
+    } else if (data.catalog) {
+      queryParams[value] = data.catalog;
+    } else if (data.radio !== "-1") {
+      if (value === "status") {
+        const status: any = {
+          "-1": "",
+          "1": "0",
+          "0": "1",
+        };
+        queryParams[value] = status[data.radio];
       } else {
-        params[contentForm.selectValue] =
-          contentForm.radio === "-1" ? "" : contentForm.radio;
+        queryParams[value] = data.radio;
       }
     }
-  } catch (e) {}
-
-  // if(contentForm.selectValue === 'title')
-  // console.log(contentForm);
+    await getListAsync(queryParams);
+  }
+};
+// 批量部分
+const batchRef = ref<InstanceType<typeof PageModel>>();
+const batchData = ref<any[]>([]);
+// 选择某几条数据
+const select = (e: any[]) => {
+  batchData.value = e;
+};
+// 全选或全不选
+const selectAll = (e: any[]) => {
+  batchData.value = e;
+};
+// 批量删除
+const batchDelete = async () => {
+  if (batchData.value?.length === 0) {
+    return ElMessage.error("请先选择一项后再点击");
+  }
+  try {
+    const tids: string[] = [];
+    const titles: string[] = [];
+    batchData.value.forEach((item) => {
+      tids.push(item._id);
+      titles.push(`"${item.title}"`);
+    });
+    await ElMessageBox.confirm(
+      `确定要删除， ${titles.join(", ")} 这 ${batchData.value.length} 文章吗？`,
+      "确定要删除文章吗？",
+      {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }
+    );
+    try {
+      const res = await batchDeletePost(tids);
+      if (res.code !== 200) {
+        return ElMessage.error(res.message);
+      }
+      ElMessage.success(res.message);
+      await getListAsync();
+    } catch (e) {
+      ElMessage.error("删除失败");
+    }
+  } catch (e) {
+    ElMessage.warning("取消操作");
+  }
+};
+// 批量编辑
+const batchEdit = () => {
+  if (batchData.value?.length === 0) {
+    return ElMessage.error("请先选择一项后再点击");
+  }
+  batchRef.value.show();
 };
 </script>
 

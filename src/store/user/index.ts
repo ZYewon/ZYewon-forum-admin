@@ -14,10 +14,10 @@ export default defineStore("user", {
     };
   },
   actions: {
+    // 刷新请求用户信息，设置用户的登陆状态
     async initUserLoginState() {
       try {
         const res = await getUserInfo();
-        console.log(res);
         if (res.code !== 200) {
           this.setIsLogin(false);
           this.setToken("");

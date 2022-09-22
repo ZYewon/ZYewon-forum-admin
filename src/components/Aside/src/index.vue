@@ -1,7 +1,9 @@
 <template>
   <div class="aside-container">
     <div class="logo">
-      <img src="~@/assets/img/logo.png" alt="" />
+      <router-link :to="{ name: 'home' }">
+        <img src="~@/assets/img/logo.png" alt="" />
+      </router-link>
     </div>
     <div class="menu-list">
       <el-menu
@@ -12,27 +14,32 @@
         :collapse="isCollapse"
         router
       >
-        <template v-for="item in data" :key="item.icon">
-          <template v-if="item.level === 1">
-            <el-sub-menu :index="item.link">
+        <template v-for="item in menuList" :key="item._id">
+          <template v-if="item.children && item.children.length > 0">
+            <el-sub-menu :index="item._id">
               <template #title>
-                <el-icon><location /></el-icon>
-                <span>{{ item.title }}</span>
+                <el-icon>
+                  <component :is="item.icon"></component>
+                </el-icon>
+                <span>{{ item.meta.title }}</span>
               </template>
               <el-menu-item
-                :index="level2.link"
-                v-for="level2 in item.children"
-                :key="level2.id"
-                route
-                >{{ level2.title }}</el-menu-item
+                :index="item2.path"
+                v-for="item2 in item.children"
+                :key="item2._id"
               >
+                <el-icon> <component :is="item2.icon"></component></el-icon>
+                <template #title>
+                  <span>{{ item2.meta.title }}</span>
+                </template>
+              </el-menu-item>
             </el-sub-menu>
           </template>
-          <template v-if="item.level === 2">
-            <el-menu-item :index="item.link" :key="item.id">
-              <el-icon><UserFilled color="#fff" /></el-icon>
+          <template v-else>
+            <el-menu-item :index="item.path" :key="item._id">
+              <el-icon> <component :is="item.icon"></component></el-icon>
               <template #title>
-                <span>{{ item.title }}</span>
+                <span>{{ item.meta.title }}</span>
               </template>
             </el-menu-item>
           </template>
@@ -43,10 +50,11 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, withDefaults } from "vue";
+import { defineProps, withDefaults, computed } from "vue";
 import { useRoute } from "vue-router";
-import { Location, UserFilled } from "@element-plus/icons-vue";
+import MenuStore from "store/menu";
 const route = useRoute();
+const menuStore = MenuStore();
 const props = withDefaults(
   defineProps<{
     isCollapse: boolean;
@@ -55,38 +63,8 @@ const props = withDefaults(
     isCollapse: false,
   }
 );
-const data = [
-  {
-    title: "文章管理",
-    icon: "Memo",
-    level: 1,
-    id: "1",
-    link: "",
-    children: [
-      {
-        title: "内容管理",
-        icon: "Document",
-        level: 2,
-        id: "1-1",
-        link: "content",
-      },
-      {
-        title: "标签管理",
-        icon: "Flag",
-        level: 2,
-        id: "1-2",
-        link: "tag",
-      },
-    ],
-  },
-  {
-    level: 2,
-    icon: "User",
-    title: "评论管理",
-    id: "2",
-    link: "comment",
-  },
-];
+
+const menuList = computed(() => menuStore.menuList);
 </script>
 
 <style scoped lang="scss">

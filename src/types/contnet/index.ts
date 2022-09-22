@@ -5,5 +5,5 @@ export interface IDefaultValue {
   status: string | number;
   isTop: string | number;
   favs: number;
-  tag?: string;
+  tags?: string;
 }

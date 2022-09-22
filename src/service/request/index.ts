@@ -4,6 +4,7 @@ import type {
   ZyewonRequestConfig,
   ZyewonRequestConfigInterceptor,
 } from "./types";
+import { ElMessage } from "element-plus";
 const CancelToken = axios.CancelToken;
 
 class HttpRequest {
@@ -31,10 +32,18 @@ class HttpRequest {
       (res) => {
         const key = res.config.url + "&" + res.config.method;
         this.removePending(key);
+        if (res.data.code !== 200) {
+          ElMessage.error(res.data.msg);
+        }
         return res.data;
       },
       (err) => {
-        return Promise.reject(err);
+        console.log(err);
+        if (err.response) {
+          return Promise.resolve(err.response.data);
+        } else {
+          return Promise.resolve({ code: 500, msg: "网络请求错误" });
+        }
       }
     );
 
