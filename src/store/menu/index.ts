@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import { getRoutes } from "api/menu";
 import { addRoute } from "@/utils/addRoutes";
-import router from "@/router";
 export default defineStore("menu", {
   state() {
     return {
@@ -21,5 +20,14 @@ export default defineStore("menu", {
     async addRoutes() {
       await addRoute("main", this.menuList);
     },
+  },
+  persist: {
+    enabled: true,
+    strategies: [
+      {
+        paths: ["menuList"],
+        storage: localStorage,
+      },
+    ],
   },
 });
