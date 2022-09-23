@@ -173,7 +173,7 @@ import type { IModelConfig } from "comp/common/PageModel/types";
 const FormConfig = reactive(formConfig);
 // 表单默认值
 const defaultValue = ref<any>({});
-export interface TableData {
+interface TableData {
   method: string;
   name?: string;
   path: string;
@@ -234,7 +234,7 @@ onMounted(() => {
 const addMenu = (type: string) => {
   FormConfig.disabled = false;
   actions = type;
-  pageForm.value.resetField();
+  pageForm.value?.resetField();
   tableData.value = [];
 };
 // 校验通过后触发的编辑节点函数（不是确认按钮）
@@ -301,7 +301,7 @@ const handleNodeClick = (data: Tree) => {
 // 表单重置回初始状态
 const resetForm = () => {
   FormConfig.disabled = true;
-  pageForm.value.resetField();
+  pageForm.value?.resetField();
   recordingNode.value = null;
   defaultValue.value = {};
   actions = "";
@@ -316,7 +316,7 @@ const broHandler = async (data: Tree) => {
       ...data,
     });
     await addMenuAsync(data);
-    pageForm.value.resetField();
+    pageForm.value?.resetField();
   } else {
     const res = deepTree(treeData.value, recordingNode.value);
     res.parent?.push({
@@ -386,10 +386,10 @@ const editHandler = async (data: Tree) => {
 };
 // 操作menu 的确认按钮，会先校验表单，通过后调用上面三个函数中的某一个
 const menuOperateConfirm = async () => {
-  const valid = await pageForm.value.validate();
+  const valid = await pageForm.value?.validate();
   if (valid) {
     // 获取表单数据
-    const data = pageForm.value.getData();
+    const data = pageForm.value?.getData();
     // 兄弟节点，如果 treeData
     if (actions === "bro") {
       await broHandler(data);
@@ -407,8 +407,8 @@ const menuOperateCancel = () => {
 
 // 模态框关闭
 const close = () => {
-  model.value.hide();
-  model.value.resetAll();
+  model.value?.hide();
+  model.value?.resetAll();
   modelDefault.value = {};
   tableActions = "";
 };
@@ -424,7 +424,7 @@ const batchEdit = () => {
   modelTitle.value = "批量设置";
   // 修改 modelConfig
   ModelConfig.value = batchModelConfig;
-  model.value.show();
+  model.value?.show();
 };
 // 批量删除
 const batchDelete = async () => {
@@ -452,7 +452,7 @@ const addResource = () => {
   tableActions = "add";
   modelTitle.value = "添加资源信息";
   ModelConfig.value = modelConfig;
-  model.value.show();
+  model.value?.show();
 };
 // 获取选中的表格节点
 const select = (e: TableData[]) => {
@@ -460,9 +460,9 @@ const select = (e: TableData[]) => {
 };
 // 模态框确认按钮
 const confirm = async () => {
-  const valid = await model.value.validate();
+  const valid = await model.value?.validate();
   if (!valid) return;
-  const data = model.value.getData();
+  const data = model.value?.getData();
   if (tableActions === "add") {
     tableData.value.push({ ...data });
     // 将其添加到对应的菜单项中的 operations 中
@@ -480,11 +480,7 @@ const confirm = async () => {
   close();
 };
 // 编辑或删除表单数据前，需校验是否进入了编辑模式
-const validateEditState = (
-  func: (row: any, index?: number) => void,
-  row: any,
-  index?: number
-) => {
+const validateEditState = (func: any, row: any, index?: number) => {
   if (FormConfig.disabled) {
     // 没有进入编辑状态，给用户提示不能编辑
     return ElMessage.info("请先进入编辑模式后在操作");
@@ -497,7 +493,7 @@ const columnEdit = (row: any, index: number) => {
   tableCurrent.value = index;
   // 设置模态框默认值
   ModelConfig.value = modelConfig;
-  model.value.show();
+  model.value?.show();
   nextTick(() => {
     modelDefault.value = row;
   });

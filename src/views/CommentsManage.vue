@@ -133,9 +133,9 @@ type ICommentParamsField =
 
 // 搜索
 const onSearch = async () => {
-  const res = await searchForm.value.validate;
+  const res = await searchForm.value?.validate();
   if (!res) return;
-  const data = searchForm.value.getData();
+  const data = searchForm.value?.getData();
   const field: ICommentParamsField = data.selectValue;
   params.value = { limit: params.value.limit, pageNum: params.value.pageNum };
   if (data.field) {
@@ -157,7 +157,7 @@ const selectAll = (e: any[]) => {
 };
 // 删除一条评论
 const deleteComment = async (row: any) => {
-  console.log(row)
+  console.log(row);
   try {
     await ElMessageBox.confirm(
       `确定要删除 ${row.cuid.nickname} 发布的 "${row.content}" 评论吗？`,
@@ -169,11 +169,11 @@ const deleteComment = async (row: any) => {
       }
     );
     const cid = row._id;
-    const tid = row.tid._id
+    const tid = row.tid._id;
     try {
       const res = await deleteCommentAsync({
         cid,
-        tid
+        tid,
       });
       if (res.code === 200) {
         tableData.value.splice(tableData.value.indexOf(row), 1);
@@ -195,10 +195,10 @@ const validSelectValueFunc = (func: any) => {
 // 批量删除
 const batchDelete = async (arr: any[]) => {
   const cids = arr.map((item) => item._id);
-  const tids = arr.map(item => item.tid._id)
+  const tids = arr.map((item) => item.tid._id);
   try {
     await ElMessageBox.confirm(
-      `确定要删除 ${ids.length} 条评论吗？`,
+      `确定要删除 ${cids.length} 条评论吗？`,
       "警告！",
       {
         confirmButtonText: "确定",
@@ -209,7 +209,7 @@ const batchDelete = async (arr: any[]) => {
     try {
       const res = await batchDeleteComments({
         cids,
-        tids
+        tids,
       });
       if (res.code === 200) {
         ElMessage.success(res.msg);
@@ -221,14 +221,14 @@ const batchDelete = async (arr: any[]) => {
 const model = ref<InstanceType<typeof PageModel>>();
 // 批量编辑
 const batchEdit = () => {
-  model.value.show();
+  model.value?.show();
 };
 const close = () => {
-  model.value.hide();
-  model.value.resetField();
+  model.value?.hide();
+  model.value?.resetField();
 };
 const confirm = async () => {
-  const data = model.value.getData();
+  const data = model.value?.getData();
   const params: any = {};
   let noRequest = true;
   Object.keys(data).forEach((key) => {

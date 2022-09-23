@@ -138,7 +138,15 @@ import {
   deleteRole as deleteRoleAsync,
   updateRole,
 } from "api/role";
-import type { TableData } from "./MenuManage.vue";
+interface TableData {
+  method: string;
+  name?: string;
+  path: string;
+  type: string;
+  remark?: string;
+  _id?: string;
+  title: string;
+}
 interface Tree {
   _id: string;
   title: string;
@@ -192,7 +200,7 @@ const handleNodeClick = (data: Tree) => {
       (item: string) => {
         tableData.value?.forEach((row) => {
           if (row._id === item) {
-            table.value.toggleRowSelection(row, true);
+            table.value?.toggleRowSelection(row, true);
           }
         });
       }
@@ -261,7 +269,7 @@ const selectRole = (item: Role, index: number) => {
 // 新增角色
 const addRole = () => {
   actions = "add";
-  model.value.show();
+  model.value?.show();
 };
 // 编辑角色
 const editRole = (item: Role, index: number) => {
@@ -269,7 +277,7 @@ const editRole = (item: Role, index: number) => {
   defaultValue.value = { ...item };
   selectedRole.value = item;
   curRoleIndex.value = index;
-  model.value.show();
+  model.value?.show();
 };
 // 删除角色
 const deleteRole = async (item: Role, index: number) => {
@@ -305,10 +313,10 @@ const editMenu = (item: Role, index: number) => {
 };
 // 模态框确认按钮
 const modelConfirm = async () => {
-  const valid = await model.value.validate();
+  const valid = await model.value?.validate();
   if (!valid) return;
   let res = null;
-  const data = model.value.getData();
+  const data = model.value?.getData();
   if (actions === "add") {
     roleData.value.push({ ...data });
     res = await addRoleAsync(data);
@@ -326,8 +334,8 @@ const modelConfirm = async () => {
   }
 };
 const modelClose = () => {
-  model.value.resetField();
-  model.value.hide();
+  model.value?.resetField();
+  model.value?.hide();
   curRoleIndex.value = null;
 };
 
@@ -335,7 +343,7 @@ const selectionChange = (data: any[]) => {
   if (!isMenuEdit.value) {
     return ElMessage.info("请进入编辑状态后再操作");
   }
-  const selectRow = table.value.getSelectionRows();
+  const selectRow = table.value?.getSelectionRows();
   // 克隆一份表格数据
   const newTableData = _.cloneDeep(tableData.value);
   selectRow.map((item: any) => {

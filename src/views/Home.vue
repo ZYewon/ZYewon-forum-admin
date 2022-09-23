@@ -43,7 +43,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, reactive } from "vue";
 import { CountUp } from "countup.js";
-import { getStatData, getWeekData as getWeekDataAsync } from "api/stat";
+import { getStatData } from "api/stat";
 import dayjs from "dayjs";
 import * as echarts from "echarts";
 import WeekStat from "comp/WeekStat";

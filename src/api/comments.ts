@@ -18,16 +18,16 @@ export const getComments = (params: ICommentParams) => {
   });
 };
 
-export const deleteComment = (params) => {
+export const deleteComment = (params: any) => {
   return request.delete({
     url: `/admin/comment-delete`,
-    params
+    params,
   });
 };
 
-export const batchDeleteComments = (data:any) => {
+export const batchDeleteComments = (data: any) => {
   return request.post({
     url: "/admin/batch-comments-delete",
-    data
+    data,
   });
 };

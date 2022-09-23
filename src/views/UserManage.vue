@@ -164,7 +164,7 @@ onMounted(() => {
   getRoleNamesAsync();
 });
 // 格式化 status 视图显示的内容
-const formatStatus = (status: string) => {
+const formatStatus: any = (status: string) => {
   return {
     "0": {
       name: "否",
@@ -187,10 +187,10 @@ let actions = "";
 // 搜索部分 + 新建用户
 const searchForm = ref<InstanceType<typeof PageSearch>>();
 const onSearch = async () => {
-  const res = await searchForm.value.validate();
+  const res = await searchForm.value?.validate();
   if (!res) return;
   const params: any = {};
-  const data = searchForm.value.getData();
+  const data = searchForm.value?.getData();
   const field = data.selectValue;
   if (data.field) {
     params[field] = data.field;
@@ -206,7 +206,7 @@ const onSearch = async () => {
 const addUser = () => {
   actions = "add";
   configModel.value = aModelConfig.value;
-  editModel.value.show();
+  editModel.value?.show();
   modelTitle.value = "新增用户";
   open();
 };
@@ -317,22 +317,22 @@ const handleBatchEdit = async (data: any) => {
 };
 // 打开模态框
 const open = (data?: any) => {
-  editModel.value.resetField();
-  editModel.value.show();
+  editModel.value?.resetField();
+  editModel.value?.show();
 };
 // 关闭模态框，包含取消按钮
 const close = () => {
-  editModel.value.hide();
-  editModel.value.resetField();
+  editModel.value?.hide();
+  editModel.value?.resetField();
   actions = "";
-  editModel.value.resetAll();
+  editModel.value?.resetAll();
 };
 // 确认按钮
 const confirm = async () => {
-  const valid = await editModel.value.validate();
+  const valid = await editModel.value?.validate();
   console.log(valid);
   if (valid) {
-    const data = editModel.value.getData();
+    const data = editModel.value?.getData();
     // debugger;
     const handler: any = {
       add: handleAdd,

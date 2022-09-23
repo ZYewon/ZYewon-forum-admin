@@ -69,13 +69,13 @@
       title="编辑文章属性"
       :default-value="defaultValue"
       :modelConfig="modelConfig"
-      @close="() => closeModel(model)"
+      @close="pageModelEvent('close')"
     >
       <template #footer>
-        <el-button type="primary" @click="() => confirmBtn(model)"
+        <el-button type="primary" @click="pageModelEvent('confirm')"
           >确认</el-button
         >
-        <el-button @click="() => closeModel(model)">取消</el-button>
+        <el-button @click="pageModelEvent('close')">取消</el-button>
       </template>
     </PageModel>
     <!--多选的编辑模态框-->
@@ -83,13 +83,13 @@
       title="批量编辑文章属性"
       ref="batchRef"
       :model-config="batchModelConfig"
-      @close="() => closeModel(batchRef)"
+      @close="pageModelEvent('batchClose')"
     >
       <template #footer>
-        <el-button type="primary" @click="() => confirmBtn(batchRef, 'batch')"
+        <el-button type="primary" @click="pageModelEvent('batchConfirm')"
           >确认</el-button
         >
-        <el-button @click="() => closeModel(batchRef)">取消</el-button>
+        <el-button @click="pageModelEvent('batchClose')">取消</el-button>
       </template>
     </PageModel>
   </div>
@@ -204,8 +204,19 @@ const handleDetete = async (row: any, index: number) => {
     ElMessage.warning("取消操作");
   }
 };
+const pageModelEvent = (type: string) => {
+  if (type === "confirm") {
+    confirmBtn(model.value);
+  } else if (type === "close") {
+    closeModel(model.value);
+  } else if (type === "batcnConfirm") {
+    confirmBtn(batchRef.value, "batch");
+  } else {
+    closeModel(batchRef.value);
+  }
+};
 // 模态框确认按钮
-const confirmBtn = async (model: typeof PageModel, type?: string) => {
+const confirmBtn = async (model: any, type?: string) => {
   // 校验表单
   try {
     const res = await model.validate();
@@ -247,7 +258,7 @@ const confirmBtn = async (model: typeof PageModel, type?: string) => {
   } catch (error) {}
 };
 // 关闭模态框
-const closeModel = (model: typeof PageModel) => {
+const closeModel = (model: any) => {
   model.hide();
   model.resetField();
 };
@@ -257,7 +268,7 @@ const searchRef = ref<InstanceType<typeof PageSearch>>();
 const onSearch = async () => {
   const valid = await searchRef.value?.validate();
   if (valid) {
-    const data = searchRef.value.getData();
+    const data = searchRef.value?.getData();
     const queryParams: any = {};
     const value = data.selectValue;
     if (data.field) {
@@ -332,7 +343,7 @@ const batchEdit = () => {
   if (batchData.value?.length === 0) {
     return ElMessage.error("请先选择一项后再点击");
   }
-  batchRef.value.show();
+  batchRef.value?.show();
 };
 </script>
 

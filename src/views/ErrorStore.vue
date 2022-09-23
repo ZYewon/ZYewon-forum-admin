@@ -99,9 +99,9 @@ onMounted(() => {
 });
 // 搜索
 const search = async () => {
-  const valid = await searchForm.value.validate();
+  const valid = await searchForm.value?.validate();
   if (valid) {
-    const data: any = searchForm.value.getData();
+    const data: any = searchForm.value?.getData();
     const params: any = {};
     if (data.field) {
       params[data.selectValue] = data.field;
@@ -155,7 +155,7 @@ const showJsonParam = (param: any) => {
   defaultValue.value = {
     param: JSON.stringify(param, null, 2),
   };
-  model.value.show();
+  model.value?.show();
 };
 </script>
 

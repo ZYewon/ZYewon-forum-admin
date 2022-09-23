@@ -64,7 +64,7 @@ const props = withDefaults(
   }
 );
 
-const menuList = computed(() => menuStore.menuList);
+const menuList = computed(() => menuStore.menuList) as any;
 </script>
 
 <style scoped lang="scss">

@@ -88,7 +88,7 @@ onMounted(() => {
 const model = ref<InstanceType<typeof PageModel>>();
 const defaultValue = ref<any>();
 // 打开模态框
-const openModel = (model: InstanceType<typeof PageModel>) => {
+const openModel = (model: any) => {
   model.show();
 };
 // 添加标签
@@ -104,8 +104,8 @@ const editTag = (row: any) => {
 };
 // 关闭模态框
 const close = () => {
-  model.value.hide();
-  model.value.resetField();
+  model.value?.hide();
+  model.value?.resetField();
 };
 // 添加标签
 const add = async (data: any) => {
@@ -163,8 +163,8 @@ const deleteTag = async (data: any) => {
 // 模态框确认
 const confirm = async (type: string) => {
   try {
-    await model.value.validate();
-    const data = model.value.getData();
+    await model.value?.validate();
+    const data = model.value?.getData();
     if (type === "add") {
       add(data);
     } else {
